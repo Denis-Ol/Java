@@ -6,11 +6,12 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 public class Day2 {
     public static List<int[]> getReports(String filePath) {
-        try (Stream<String> lines = Files.lines(Path.of("advent","data", filePath))) {
+        try (Stream<String> lines = Files.lines(Path.of("advent", "data", filePath))) {
             return lines.map(line -> Arrays.stream(line.split(" ")).mapToInt(Integer::parseInt).toArray()).toList();
         } catch (IOException e) {
             System.err.println("Error reading file: " + e.getMessage());
@@ -19,23 +20,25 @@ public class Day2 {
     }
 
     public static boolean isReportSafe(int[] levels) {
-        boolean isIncreasing = false;
         int startDiff = levels[1] - levels[0];
-        if (startDiff == 0 || Math.abs(startDiff) > 3) return false;
-        else if (startDiff > 0) isIncreasing = true;
-
+        if (startDiff == 0 || Math.abs(startDiff) > 3) {
+            return false;
+        }
         for (int i = 2; i < levels.length; i++) {
             int diff = levels[i] - levels[i - 1];
-            if (diff == 0 || Math.abs(diff) > 3 || (diff > 0 && !isIncreasing) || (diff < 0 && isIncreasing))
+            if (diff == 0 || Math.abs(diff) > 3 || diff * startDiff < 0) {
                 return false;
+            }
         }
         return true;
     }
 
-    public static boolean isTolaratedReportSafe(int[] levels) {
-        List<int[]> listOfCandidates = getArrayFamily(levels);
+    public static boolean isTolerantReportSafe(int[] levels) {
+        List<int[]> listOfCandidates = getArrayFamily2(levels);
         for (int[] candidateArray : listOfCandidates) {
-            if (isReportSafe(candidateArray)) return true;
+            if (isReportSafe(candidateArray)) {
+                return true;
+            }
         }
         return false;
     }
@@ -52,14 +55,13 @@ public class Day2 {
         int count = 0;
         for (int[] report : reports) {
             if (isReportSafe(report)) count++;
-            else if (isTolaratedReportSafe(report)) count++;
+            else if (isTolerantReportSafe(report)) count++;
         }
         return count;
     }
 
     public static List<int[]> getArrayFamily(int[] levels) {
         List<int[]> listArrays = new ArrayList<>(levels.length);
-
         for (int i = 0; i < levels.length; i++) {
             int[] temp = new int[levels.length - 1];
             int tempIndex = 0;
@@ -71,36 +73,28 @@ public class Day2 {
         return listArrays;
     }
 
+    public static List<int[]> getArrayFamily2(int[] levels) {
+        List<int[]> listArrays = new ArrayList<>(levels.length);
+        for (int i = 0; i < levels.length; i++) {
+            int[] temp = new int[levels.length - 1];
+            System.arraycopy(levels, 0, temp, 0, i);
+            System.arraycopy(levels, i + 1, temp, i, levels.length - 1 - i);
+            listArrays.add(temp);
+        }
+        return listArrays;
+    }
+
+    public static List<int[]> getArrayFamily3(int[] levels) {
+        return IntStream.range(0, levels.length)
+                .mapToObj(i -> IntStream.range(0, levels.length)
+                        .filter(j -> i != j)
+                        .map(j -> levels[j])
+                        .toArray())
+                .toList();
+    }
+
     public static void main(String[] args) {
-//        String filePath = "Day2-test.txt";
-//        List<int[]> reports = getReports(filePath);
-
-//        System.out.println("Reports:");
-//        for (int[] report : reports) {
-//            System.out.println(Arrays.toString(report));
-//        }
-
-//        int count = 0;
-//        for (int[] report : reports) {
-//            if (isReportSafe(report)) count++;
-//        }
-//        System.out.println("count = " + count);
-//
-//        System.out.println("Test safe count = " + safeCount(getReports("Day2-test.txt")));
         System.out.println("Input safe count = " + safeCount(getReports("Day2-input.txt")));
         System.out.println("Input safe tolerated count = " + safeCountWithDampener(getReports("Day2-input.txt")));
-
-//        for (int[] report : reports) {
-//            System.out.println("Report = " + Arrays.toString(report) + ". Is it safe? " + isReportSafe(report) +
-//                    ". Is it toleratable? " + isTolaratedReportSafe(report));
-//            List<int[]> listOfCandidates = getArrayFamily(report);
-//            for (int[] candidateArray : listOfCandidates) {
-//                System.out.println("Candidate = " + Arrays.toString(candidateArray) + ". Is it safe? " + isReportSafe(candidateArray));
-//            }
-//            System.out.println();
-//        }
-//        System.out.println("Test safe count with Problem Dampener = " + safeCountWithDampener(getReports("Day2-test.txt")));
-
-
     }
 }
