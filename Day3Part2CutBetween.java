@@ -28,7 +28,7 @@ public class Day3Part2CutBetween {
                 sumOfMuls += num1 * num2;
             }
         }
-        System.out.println("sumOfMuls = " + sumOfMuls); //80747545
+        System.out.println("sumOfMuls = " + sumOfMuls); //80,747,545, but got 65,949,847
     }
 }
 
