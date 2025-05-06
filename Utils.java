@@ -44,4 +44,13 @@ public class Utils {
             return null;
         }
     }
+
+    public static String readFileToString(String filePath) {
+        try (Stream<String> lines = Files.lines(Path.of("advent", "data", filePath))) {
+            return lines.collect(Collectors.joining("\n"));
+        } catch (IOException e) {
+            System.err.println("Error reading file: " + e.getMessage());
+            return null;
+        }
+    }
 }
